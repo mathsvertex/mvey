@@ -79,3 +79,7 @@ Push this folder to a private GitHub repo, then in Render choose New > Blueprint
 ### Free hosting
 
 The blueprint uses Render's free plan. Free web services sleep after about 15 minutes idle, so create a free monitor at uptimerobot.com that requests `https://<your-service>.onrender.com/` every 5 minutes. For real parent traffic, change `plan: free` to `plan: starter` in `render.yaml`.
+
+## Deploying on Google Cloud Run
+
+See `CLOUD_RUN.md` for the console steps (set `INLINE_PROCESSING=1`).

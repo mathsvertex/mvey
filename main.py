@@ -606,7 +606,12 @@ async def receive_webhook(request: Request, background: BackgroundTasks):
         body = json.loads(raw)
     except ValueError:
         raise HTTPException(status_code=400, detail="invalid JSON")
-    background.add_task(process_payload, body)  # answer Meta straight away; the reply is sent in the background
+    if cfg("INLINE_PROCESSING") == "1":
+        # Cloud Run slows the CPU once a response is sent, so finish the reply first.
+        # Meta may retry a slow call; the message-id check makes a retry a no-op.
+        await process_payload(body)
+    else:
+        background.add_task(process_payload, body)  # answer Meta straight away; the reply is sent in the background
     return {"status": "received"}
 
 
