@@ -1,0 +1,35 @@
+# Render Blueprint: one web service (the agent) plus a Redis-compatible Key Value store for memory.
+# Secrets marked sync:false are asked for in the Render dashboard and never live in this file.
+services:
+  - type: web
+    name: maths-vertex-agent
+    runtime: docker
+    plan: free               # sleeps after ~15 min idle: add a free UptimeRobot ping to / every 5 min; use starter for real traffic
+    numInstances: 1          # keep one instance: the per-parent reply lock lives in the process
+    healthCheckPath: /
+    envVars:
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        value: "4943710932571546"
+      - key: SHEET_ID
+        value: 1YcAHU3WVAvpAPvuOGwo7bfyk6otMZupu5HkppmOxmNA
+      - key: WHATSAPP_VERIFY_TOKEN
+        generateValue: true  # Render makes a random value; copy it from the dashboard into Meta's webhook settings
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: maths-vertex-cache
+          property: connectionString
+
+  - type: keyvalue
+    name: maths-vertex-cache
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: []          # empty list = reachable only from your other Render services
